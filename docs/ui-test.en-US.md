@@ -4,60 +4,60 @@ title: UI Test
 type: 进阶
 ---
 
-UI 测试是项目研发流程中的重要一环，有效的测试用例可以梳理业务需求，保证研发的质量和进度，让工程师可以放心的重构代码和新增功能。
+UI testing is an important part of the project development process. Effective test cases can sort out business needs and ensure the quality and progress of development, It make engineers can refactor the code and add new features without trepidation.
 
-Ant Design Pro 封装了一套简洁易用的 React 单元测试和 E2E 测试方案，在项目根目录运行以下命令就能运行测试用例。
+Ant Design Pro comes packaged with a handy set of easy-to-use React unit tests and E2E test framework to run test cases by running the following command at the project root.
 
 ```bash
-$ npm run test:all  # 执行所有测试
+$ npm run test:all  # Execute all the tests
 ```
 
 <img src="https://gw.alipayobjects.com/zos/rmsportal/bNkhdMosBxuEhhKgnROo.png" width="700" />
 
-下面简单介绍如何在项目中书写你的业务测试用例。
+Now we start a quick introduction to writing your business test cases in your project.
 
-## 单元测试
+## Unit Tests
 
-单元测试用于测试 React UI 组件的表现。我们参考了 [create-react-app](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md#running-tests)，使用 [jest](http://facebook.github.io/jest/) 作为测试框架。
+Unit tests are used to test the appearance of React UI components。We referenced [create-react-app](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md#running-tests), using [jest](http://facebook.github.io/jest/) as a test framework.
 
-jest 是一个 node 端运行的测试框架，使用了 jsdom 来模拟 DOM 环境，适合用于快速测试 React 组件的逻辑表现，需要真实浏览器可以参考 E2E 测试部分。
+jest is a node-side test framework that uses jsdom to simulate the DOM environment and is suitable for quick testing of the logical behavior of React components. If requiring a real browser, please refer to the E2E test section.
 
-### 写一个用例
+### Write a case
 
-比如，我们可以建一个文件 `src/routes/Result/Success.test.js` 来测试成功页面组件的 UI 表现。
+For example, we could create a file `src/routes/Result/Success.test.js` to test the UI appearance of successful page components.
 
 ```jsx
 import React from 'react';
 import { shallow } from 'enzyme';
-import Success from './Success';   // 引入对应的 React 组件
+import Success from './Success';   // Introduce the corresponding React component
 
 it('renders with Result', () => {
-  const wrapper = shallow(<Success />);                           // 进行渲染
-  expect(wrapper.find('Result').length).toBe(1);                  // 有 Result 组件
-  expect(wrapper.find('Result').prop('type')).toBe('success');    // Result 组件的类型是成功
+  const wrapper = shallow(<Success />);                           // Rendering
+  expect(wrapper.find('Result').length).toBe(1);                  // Has Result component
+  expect(wrapper.find('Result').prop('type')).toBe('success');    // The type of the Result component is success
 });
 ```
 
-这里使用了 [enzyme](http://airbnb.io/enzyme/docs/api/index.html) 作为测试库，它提供了大量实用的 API 来帮助我们测试 React 组件。断言部分沿用了 jest 默认的 [jasmine2 expect 语法](https://facebook.github.io/jest/docs/en/expect.html#content)。
+Here [enzyme](http://airbnb.io/enzyme/docs/api/index.html) is used as a test library, which provides a number of useful APIs to help us test React components. Assert part use the jest acquiescence [jasmine2 expect grammar](https://facebook.github.io/jest/docs/en/expect.html#content).
 
-### 本地执行
+### Local execution
 
-使用以下的命令将统一搜索和执行 `src` 下 `*.test.js` 格式的用例文件。
+Use the following command will be search and execute `* .test.js` format test case file in `src`.
 
 ```bash
 $ npm test .test.js
 ```
 
-#### 执行单个或一组用例
+#### Executes a single or a set of cases
 
 ```bash
-$ npm test src/routes/Result/Success.test.js  # 测试 Success.test.js
-$ npm test src/routes                         # 测试 routes 下的所有用例文件
+$ npm test src/routes/Result/Success.test.js  # test Success.test.js
+$ npm test src/routes                         # test all test case file in routes
 ```
 
-### 测试 dva 包装组件
+### Test dva wrapped components
 
-被 dva `connect` 的 React 组件可以使用下面方式进行测试。
+Components wrapped by dva `connect` can use the following way to test.
 
 ```jsx
 import React from 'react';
@@ -65,7 +65,7 @@ import { shallow } from 'enzyme';
 import Dashboard from './Dashboard';
 
 it('renders Dashboard', () => {
-  // 使用包装后的组件
+  // Use the wrapped components
   const wrapper = shallow(
     <Dashboard.WrappedComponent user={{ list: [] }} />
   );
@@ -73,19 +73,19 @@ it('renders Dashboard', () => {
 });
 ```
 
-## e2e 测试
+## e2e test
 
-端到端测试也叫冒烟测试，用于测试真实浏览器环境下前端应用的流程和表现，相当于代替人工去操作应用。
+End-to-end testing, also known as smoke testing, is used to test the process and appearance of front-end applications in a real-world browser environment, equivalent to operating application instead of manually.
 
-我们引入了 [nightmare](http://www.nightmarejs.org/) 作为 E2E 测试的工具，nightmare 默认使用 electron 作为浏览器环境运行你的应用，并且提供了非常语义化的 API 来描述业务逻辑。
+We import [nightmare](http://www.nightmarejs.org/) as a tool for E2E testing, nightmare use electron as the browser environment by default to runing your application, and provides a very semantic API for describing business logic.
 
-### 写一个 e2e 用例
+### Write a e2e test case
 
-假设有一个需求，用户在登录页面输入错误的用户名和密码，点击登录后，出现错误提示框。
+Assuming there is a demand, the user enters the wrong user name and password on the login page, and after clicking login, an error message box will appear.
 
 <img src="https://gw.alipayobjects.com/zos/rmsportal/oZeYewGOUJkmqXAPoOFC.gif" width="400" />
 
-我们写一个用例来保障这个流程。在 `src/e2e/` 目录下建一个 `Login.e2e.js` 文件，按上述业务需求描述测试用例。
+We write a test case to ensure this process. Create a `Login.e2e.js` file in the `src/e2e/`directory and describe the test cases as described above for your business needs.
 
 ```js
 import Nightmare from 'nightmare';
@@ -102,11 +102,11 @@ describe('Login', () => {
 });
 ```
 
-更多 nightmare 的方法可以参考 [segmentio/nightmare#api](https://github.com/segmentio/nightmare#api)。
+More api of nightmare can refer to [segmentio/nightmare # api](https://github.com/segmentio/nightmare#api).
 
-### 运行用例
+### Run test cases
 
-运行下列命令将执行 src 下所有的 `*.e2e.js` 用例文件。
+Run the following command to execute all `*.e2e.js` test case files under src.
 
 ```bash
 $ npm test .e2e.js
@@ -114,41 +114,41 @@ $ npm test .e2e.js
 
 <img src="https://gw.alipayobjects.com/zos/rmsportal/LGCXopksUYMUhjRgdYSz.png" width="700" />
 
-> 注意，本地测试 e2e 用例需要启动 `npm start`，否则会报 `Failed: navigation error` 的错误。
+> Note: Test e2e use case locally needs to start `npm start`, otherwise it will report `Failed: navigation error` error.
 
-## watch 模式
+## watch mode
 
 ```
 $ npm test -- --watch
 ```
 
-添加 `--watch` 配置可以进入 watch 模式，当你修改和保存文件时，Jest 会自动执行相应用例。Jest 的命令行工具也提供了各种方便的快捷键来执行你需要的用例。
+Add `--watch` configuration can enter the watch mode, when you modify and save the file, Jest will automatically execute the corresponding test cases. Jest's command line tools also provide a variety of convenient shortcuts to execute the use cases you need.
 
 <img src="https://gw.alipayobjects.com/zos/rmsportal/MnmxiavystfcBDskyKRg.png" width="700" />
 
-## 测试覆盖率
+## Test coverage
 
 ```
 $ npm test -- --coverage
 ```
 
-添加 `--coverage` 配置可以显示项目的测试覆盖率。
+Add a `--coverage` configuration to display the project's test coverage.
 
 <img src="https://camo.githubusercontent.com/bd0bbda8e44ea747e4c199d0e212d40563ad2fcb/687474703a2f2f692e696d6775722e636f6d2f356246686e54532e706e67" width="700" />
 
-## 聚焦和忽略用例
+## Focus or ignore use cases
 
-使用 `xit()` 取代 `it()` 可以暂时忽略用例，`fit()` 可以聚焦当前用例并忽略其他所有用例。这两个方法可以帮助你在开发过程中只关注当前需要的用例。
+Use `xit()` instead of `it()` to temporarily ignore the test case, `fit()` to focus on the current test case and ignore all other test cases. These two methods can help you to focus on the current need of test cases in the development process.
 
-## 接入集成测试服务
+## Access integration testing services
 
-如果需要接入 travis、CircleCI、Gitlab CI 等集成测试环境，可以参考本仓库提供的 `.travis.yml`。
+If you need access to integrated test environment such as travis, CircleCI, Gitlab CI, you can refer to `.travis.yml` provided by this repository.
 
-注意 e2e 测试需要集成环境支持 electron，如果不支持，你可以使用 `npm test .test.js` 单独运行单元测试。
+Note that the e2e test requires integrated environment support, and if not, you can run unit tests separately using `npm test .test.js`.
 
-## 参考链接
+## Reference link
 
-更多测试技巧和功能请参考以下链接。
+For more testing tips and functions, please refer to the following link.
 
 - [create-react-app tests](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md#running-tests)
 - [jest](https://facebook.github.io/jest/)
